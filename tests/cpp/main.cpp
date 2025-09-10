@@ -112,7 +112,7 @@ Move findBestMove(Board &board, int depth) {
 int main() {
     Board board("rnbqkbnr/ppp1pppp/8/3p4/2P5/8/PP1PPPPP/RNBQKBNR w KQkq d6 0 1");
 
-    Move best = findBestMove(board, 8);
+    Move best = findBestMove(board, 6);
 
     std::cout << "Najlepszy ruch: " << uci::moveToUci(best) << "\n";
 
