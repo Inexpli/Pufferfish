@@ -16,7 +16,7 @@ def board_to_ndarray(board) -> np.ndarray:
     Tensor ma 13 kanałów:
     - 6 kanałów dla białych figur (0-5)
     - 6 kanałów dla czarnych figur (6-11)
-    - 1 kanał dla ruchów (12)
+    - 1 kanał dla legalnych ruchów (12)
     Każdy kanał jest macierzą 8x8, gdzie 1 oznacza obecność figury lub ruchu, a 0 brak figury lub ruchu
     """
     tensor = np.zeros((8, 8, 13), dtype=np.float32)
