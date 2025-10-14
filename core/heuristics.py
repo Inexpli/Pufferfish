@@ -1,7 +1,7 @@
 import chess
 
 # Wartości figur
-piece_values_local = {
+piece_values = {
     chess.PAWN: 100,
     chess.KNIGHT: 320,
     chess.BISHOP: 330,
