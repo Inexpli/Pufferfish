@@ -82,7 +82,7 @@ def get_num_indexes(y):
     """
     return len(np.unique(y))
 
-def load_games(path="../data/"):
+def load_games(path="../../data/"):
     files = [file for file in os.listdir(path) if file.endswith(".pgn")]
     games = []
     for file in tqdm(files, desc="Przetwarzanie plików PGN"):
@@ -94,7 +94,7 @@ def load_games(path="../data/"):
                 games.append(game)
     return games
 
-def load_data(path="../data/"):
+def load_data(path="../../data/"):
     """
     Wczytuje dane z listy gier i zwraca listę tensorów i etykiet
     """

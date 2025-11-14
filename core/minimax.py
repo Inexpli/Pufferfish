@@ -29,6 +29,7 @@ def order_moves(position, moves, tt_best_move=None):
 
 def minimax(position, depth, alpha, beta, maximizingPlayer):
     '''Algorytm minimax z przycinaniem alfa-beta i tablicą transpozycji.'''
+    nodes = 1  # Licznik dla bieżącego węzła
     state_key = position.zobrist_hash
     
     tt_best_move = None
@@ -36,21 +37,21 @@ def minimax(position, depth, alpha, beta, maximizingPlayer):
         entry = transposition_table[state_key]
         if entry.depth >= depth:
             if entry.flag == 'exact':
-                return entry.value, entry.best_move
+                return entry.value, nodes, entry.best_move
             elif entry.flag == 'lowerbound' and entry.value >= beta:
-                return entry.value, entry.best_move
+                return entry.value, nodes, entry.best_move
             elif entry.flag == 'upperbound' and entry.value <= alpha:
-                return entry.value, entry.best_move
+                return entry.value, nodes, entry.best_move
         tt_best_move = entry.best_move
     
     if depth == 0:
         value = quiescence(position, alpha, beta, maximizingPlayer)
-        return value, None
+        return value, nodes, None
     
     if position.is_game_over():
         value = evaluate_board(position)
         transposition_table[state_key] = Entry(value, depth, 'exact', None)
-        return value, None
+        return value, nodes, None
     
     alpha_orig = alpha
     beta_orig = beta
@@ -62,7 +63,8 @@ def minimax(position, depth, alpha, beta, maximizingPlayer):
         maxEval = float('-inf')
         for move in moves:
             position.push(move)
-            evaluation, _ = minimax(position, depth-1, alpha, beta, False)
+            evaluation, child_nodes, _ = minimax(position, depth-1, alpha, beta, False)
+            nodes += child_nodes
             position.pop()
             if evaluation > maxEval:
                 maxEval = evaluation
@@ -75,7 +77,8 @@ def minimax(position, depth, alpha, beta, maximizingPlayer):
         minEval = float('inf')
         for move in moves:
             position.push(move)
-            evaluation, _ = minimax(position, depth-1, alpha, beta, True)
+            evaluation, child_nodes, _ = minimax(position, depth-1, alpha, beta, True)
+            nodes += child_nodes
             position.pop()
             if evaluation < minEval:
                 minEval = evaluation
@@ -93,7 +96,7 @@ def minimax(position, depth, alpha, beta, maximizingPlayer):
     
     transposition_table[state_key] = Entry(value, depth, flag, best_move)
 
-    return value, best_move
+    return value, nodes, best_move
 
 def quiescence(position, alpha, beta, maximizingPlayer, qs_depth=0, max_qs_depth=4):
     '''Kontynuuje wyszukiwanie tylko dla captures, aż do cichej pozycji.'''

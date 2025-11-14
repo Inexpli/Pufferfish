@@ -6,7 +6,6 @@ def get_move_from_table(board, tb):
     best_move = None
     best_wdl = None  
     best_dtm = None
-    move_info = []
 
     for mv in board.legal_moves:
         board.push(mv)
@@ -28,8 +27,6 @@ def get_move_from_table(board, tb):
 
         wdl = -wdl_post
         dtm = -dtm_post if dtm_post is not None else None
-
-        move_info.append((mv, wdl, dtm))
 
         if best_move is None:
             best_move = mv
@@ -59,7 +56,7 @@ def get_move_from_table(board, tb):
         board.pop()
 
     if best_move is None:
-        return move_info, None
+        raise Exception("Brak ruchów w tabeli końcówek Gaviota dla tej pozycji.")
 
-    return move_info, best_move
+    return best_wdl*1000, best_dtm, best_move
 
