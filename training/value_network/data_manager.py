@@ -84,8 +84,7 @@ def get_data_shapes(X,y):
 
 def parse_evaluation(eval_str: str, clip_value: float = 1000.0) -> float | None:
     """
-    Proste: clip do [-clip_value, clip_value], a potem podziel przez clip_value.
-    Mate -> +/- clip_value
+    Normalizuje ocenę pozycji z formatu silnika szachowego na wartość zmiennoprzecinkową w zakresie [-1.0, 1.0]
     """
     if eval_str is None:
         return None
@@ -94,9 +93,8 @@ def parse_evaluation(eval_str: str, clip_value: float = 1000.0) -> float | None:
         return None
 
     if '#' in s:
-        # treat mate as max magnitude (sign from '-' if present)
         sign = -1.0 if ('-' in s and not '+' in s) else 1.0
-        return sign * 1.0  # already normalized to +/-1
+        return sign * 1.0
 
     try:
         cp = float(s.replace('+', ''))
@@ -104,7 +102,7 @@ def parse_evaluation(eval_str: str, clip_value: float = 1000.0) -> float | None:
         return None
 
     cp = np.clip(cp, -clip_value, clip_value)
-    return float(cp / clip_value)  # in [-1,1]
+    return float(cp / clip_value)
 
 def load_games(limit):
     """

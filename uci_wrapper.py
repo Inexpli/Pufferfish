@@ -4,7 +4,7 @@ import time
 import threading
 from typing import Optional
 
-from engine import minimax, ZobristBoard, TB_DIR
+from engine import engine_select, ZobristBoard, TB_DIR
 
 import chess
 import chess.gaviota
@@ -13,8 +13,8 @@ uci_running = True
 stop_search = False
 stop_lock = threading.Lock()
 
-DEFAULT_MAX_DEPTH = 20
-DEFAULT_DEPTH = 6
+DEFAULT_MAX_DEPTH = 5
+DEFAULT_DEPTH = 4
 
 def set_stop_flag(val: bool):
     '''
@@ -53,7 +53,7 @@ def iterative_deepening(
 
     if preferred_depth is not None and time_limit_ms is None:
         try:
-            val, nodes, mv = minimax(board, preferred_depth, float("-inf"), float("inf"), white_to_move)
+            val, nodes, mv = engine_select(board, white_to_move, preferred_depth)
             total_nodes += nodes
             print(f"info depth {preferred_depth} score cp {int(val * 100)} pv {mv.uci() if mv else '(none)'}")
             return val, total_nodes, mv
@@ -71,7 +71,7 @@ def iterative_deepening(
 
         try:
             t0 = time.time()
-            val, nodes, mv = minimax(board, depth, float("-inf"), float("inf"), white_to_move)
+            val, nodes, mv = engine_select(board, white_to_move, depth)
             t1 = time.time()
             elapsed_this_depth = int((t1 - t0) * 1000)
             total_nodes += nodes
@@ -88,7 +88,7 @@ def iterative_deepening(
 
         if time_limit_ms is not None:
             elapsed_ms = int((time.time() - start) * 1000)
-            if elapsed_ms >= time_limit_ms:
+            if elapsed_ms >= time_limit_ms * 0.9:
                 break
 
         if get_stop_flag():
@@ -121,14 +121,14 @@ def compute_movetime_from_clock(
     if time_left is None:
         return None
 
-    movetime = int(max(50, min(time_left / 30.0, 10000)))
+    movetime = int(max(50, min(time_left / 40.0, 8000)))
     if inc:
-        movetime += int(inc * 0.8)
+        movetime += int(inc * 0.7)
 
     if movetime < 50:
         movetime = 50
     if movetime > time_left:
-        movetime = int(time_left * 0.9)
+        movetime = int(time_left * 0.8)
 
     return movetime
 
@@ -263,14 +263,10 @@ def uci_loop():
             set_stop_flag(False)
 
             chosen_move = None
-            chosen_val = None
-            chosen_nodes = 0
             if depth is not None:
                 try:
-                    val, nodes, mv = minimax(cur_board, depth, float("-inf"), float("inf"), cur_board.turn == chess.WHITE)
+                    val, nodes, mv = engine_select(cur_board, cur_board.turn == chess.WHITE, depth)
                     chosen_move = mv
-                    chosen_val = val
-                    chosen_nodes = nodes
                     print(f"info depth {depth} score cp {int(val * 100)} pv {mv.uci() if mv else '(none)'}")
                 except Exception as e:
                     print(f"info string minimax exception single depth: {e}")
@@ -280,28 +276,28 @@ def uci_loop():
                     movetime = compute_movetime_from_clock(cur_board, wtime, btime, winc, binc, movestogo)
                 if movetime is None:
                     try:
-                        val, nodes, mv = minimax(cur_board, DEFAULT_DEPTH, float("-inf"), float("inf"), cur_board.turn == chess.WHITE)
+                        val, nodes, mv = engine_select(cur_board, cur_board.turn == chess.WHITE, DEFAULT_DEPTH)
                         chosen_move = mv
-                        chosen_val = val
-                        chosen_nodes = nodes
                         print(f"info depth {DEFAULT_DEPTH} score cp {int(val * 100)} pv {mv.uci() if mv else '(none)'}")
                     except Exception as e:
                         print(f"info string minimax exception default depth: {e}")
                         chosen_move = None
                 else:
-                    safety_ms = 30
+                    safety_ms = 50
                     tl_ms = max(10, movetime - safety_ms)
                     max_depth = DEFAULT_MAX_DEPTH
                     val, nodes, mv = iterative_deepening(cur_board, cur_board.turn == chess.WHITE, time_limit_ms=tl_ms, max_depth=max_depth)
                     chosen_move = mv
-                    chosen_val = val
-                    chosen_nodes = nodes
 
             if chosen_move is None:
-                print("bestmove (none)")
-            else:
-                print(f"bestmove {chosen_move.uci()}")
+                legal_moves = list(cur_board.legal_moves)
+                if legal_moves:
+                    chosen_move = legal_moves[0]
+                    print(f"info string Fallback to first legal move: {chosen_move.uci()}")
+
+            print(f"bestmove {chosen_move.uci()}")
             sys.stdout.flush()
+            set_stop_flag(False)
 
         elif cmd == "stop":
             set_stop_flag(True)
