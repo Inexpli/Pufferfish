@@ -1,21 +1,13 @@
 import json
-import os
-import sys
 import numpy as np
 import chess
 import torch
+from core.utils import resource_path
 from core.minimax import minimax
 from core.transposition_table import LRUCache, ZobristBoard
 from core.gaviota import get_move_from_table
 from training.policy_network.data_manager import board_to_tensor, index_to_move
 from training.policy_network.model import Model
-
-def resource_path(rel_path: str) -> str:
-    if getattr(sys, 'frozen', False):
-        base_path = sys._MEIPASS 
-    else:
-        base_path = os.path.abspath(os.path.dirname(__file__))
-    return os.path.join(base_path, rel_path)
 
 CONFIDENCE_THRESHOLD = 0.7
 MODEL_PATH = resource_path("models/policy_network/CN2_BN2_RLROP.pth")
@@ -37,7 +29,7 @@ torch.set_grad_enabled(False)
 
 def predict_move_with_confidence(board: chess.Board):
     """
-    Zwraca przewidziany ruch i confidence
+    Zwraca przewidziany ruch i confidence.
     """
     X_tensor = board_to_tensor(board).to(device)
     with torch.no_grad():
@@ -57,7 +49,7 @@ def predict_move_with_confidence(board: chess.Board):
 
 def engine_select(board_obj, white_to_move, depth, start_time=None, time_limit=None):
     """
-    Wybiera ruch na podstawie modelu i minimax
+    Wybiera ruch na podstawie tabeli końcówek Gaviota, wyuczonego modelu i algorytmu minimax.
     """
     try:
         with chess.gaviota.open_tablebase(TB_DIR) as tb:
