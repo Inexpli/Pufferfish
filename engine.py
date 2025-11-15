@@ -55,7 +55,7 @@ def predict_move_with_confidence(board: chess.Board):
 
     return None, None
 
-def engine_select(board_obj, white_to_move, depth):
+def engine_select(board_obj, white_to_move, depth, start_time=None, time_limit=None):
     """
     Wybiera ruch na podstawie modelu i minimax
     """
@@ -68,8 +68,8 @@ def engine_select(board_obj, white_to_move, depth):
 
     model_move, confidence = predict_move_with_confidence(board_obj)
     if model_move is not None and confidence >= CONFIDENCE_THRESHOLD:
-        score, nodes, best_move = minimax(board_obj, depth // 2, float('-inf'), float('inf'), white_to_move)
+        score, nodes, best_move = minimax(board_obj, depth // 2, float('-inf'), float('inf'), white_to_move, start_time, time_limit)
         if best_move == model_move:
             return score, nodes, best_move
     
-    return minimax(board_obj, depth, float('-inf'), float('inf'), white_to_move)
+    return minimax(board_obj, depth, float('-inf'), float('inf'), white_to_move, start_time, time_limit)
