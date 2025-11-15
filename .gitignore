@@ -1,5 +1,9 @@
 .venv/
-data/
+data/*
+/__pycache__/
 */__pycache__/
-tablebases/gaviota/*
-tablebases/syzygy/*
+*/*/__pycache__/
+tablebases/*
+build/
+dist/
+uci_wrapper.spec

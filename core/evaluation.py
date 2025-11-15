@@ -1,5 +1,5 @@
 import chess
-from .heuristics import piece_position, piece_values_local
+from .heuristics import piece_position, piece_values
 
 def evaluate_board(position):
     '''Ocena pozycji szachowej.'''
@@ -13,7 +13,7 @@ def evaluate_board(position):
         piece = position.piece_at(square)
         if piece:
             pt = piece.piece_type
-            val = piece_values_local[pt]
+            val = piece_values[pt]
             if piece.color == chess.WHITE:
                 mirrored = chess.square_mirror(square)
                 score += val + piece_position[pt][mirrored] + len(list(position.attacks(square))) * 10

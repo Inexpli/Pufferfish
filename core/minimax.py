@@ -1,6 +1,8 @@
+import time
 import chess
 from .evaluation import evaluate_board
 from .transposition_table import LRUCache, Entry
+from .utils import get_stop_flag
 
 # Inicjalizacja tablicy transpozycji
 transposition_table = LRUCache(maxsize=100000)
@@ -27,30 +29,37 @@ def order_moves(position, moves, tt_best_move=None):
         return score
     return sorted(moves, key=move_score, reverse=True)
 
-def minimax(position, depth, alpha, beta, maximizingPlayer):
+def minimax(position, depth, alpha, beta, maximizingPlayer, start_time=None, time_limit=None):
     '''Algorytm minimax z przycinaniem alfa-beta i tablicą transpozycji.'''
+    nodes = 1
     state_key = position.zobrist_hash
     
+    if start_time is None:
+        start_time = time.time()
+
+    if get_stop_flag() or (time_limit and (time.time() - start_time) * 1000 >= time_limit):
+        return evaluate_board(position), nodes, None
+
     tt_best_move = None
     if state_key in transposition_table:
         entry = transposition_table[state_key]
         if entry.depth >= depth:
             if entry.flag == 'exact':
-                return entry.value, entry.best_move
+                return entry.value, nodes, entry.best_move
             elif entry.flag == 'lowerbound' and entry.value >= beta:
-                return entry.value, entry.best_move
+                return entry.value, nodes, entry.best_move
             elif entry.flag == 'upperbound' and entry.value <= alpha:
-                return entry.value, entry.best_move
+                return entry.value, nodes, entry.best_move
         tt_best_move = entry.best_move
     
     if depth == 0:
-        value = quiescence(position, alpha, beta, maximizingPlayer)
-        return value, None
+        value = quiescence(position, alpha, beta, maximizingPlayer, start_time=start_time, time_limit=time_limit)
+        return value, nodes, None
     
     if position.is_game_over():
         value = evaluate_board(position)
         transposition_table[state_key] = Entry(value, depth, 'exact', None)
-        return value, None
+        return value, nodes, None
     
     alpha_orig = alpha
     beta_orig = beta
@@ -62,7 +71,8 @@ def minimax(position, depth, alpha, beta, maximizingPlayer):
         maxEval = float('-inf')
         for move in moves:
             position.push(move)
-            evaluation, _ = minimax(position, depth-1, alpha, beta, False)
+            evaluation, child_nodes, _ = minimax(position, depth-1, alpha, beta, False, start_time, time_limit)
+            nodes += child_nodes
             position.pop()
             if evaluation > maxEval:
                 maxEval = evaluation
@@ -75,7 +85,8 @@ def minimax(position, depth, alpha, beta, maximizingPlayer):
         minEval = float('inf')
         for move in moves:
             position.push(move)
-            evaluation, _ = minimax(position, depth-1, alpha, beta, True)
+            evaluation, child_nodes, _ = minimax(position, depth-1, alpha, beta, True, start_time, time_limit)
+            nodes += child_nodes
             position.pop()
             if evaluation < minEval:
                 minEval = evaluation
@@ -93,10 +104,16 @@ def minimax(position, depth, alpha, beta, maximizingPlayer):
     
     transposition_table[state_key] = Entry(value, depth, flag, best_move)
 
-    return value, best_move
+    return value, nodes, best_move
 
-def quiescence(position, alpha, beta, maximizingPlayer, qs_depth=0, max_qs_depth=4):
+def quiescence(position, alpha, beta, maximizingPlayer, qs_depth=0, max_qs_depth=4, start_time=None, time_limit=None):
     '''Kontynuuje wyszukiwanie tylko dla captures, aż do cichej pozycji.'''
+    if start_time is None:
+        start_time = time.time()
+
+    if get_stop_flag() or (time_limit and (time.time() - start_time) * 1000 >= time_limit):
+        return evaluate_board(position)
+
     if qs_depth > max_qs_depth or position.is_game_over():
         return evaluate_board(position)
     
@@ -120,7 +137,7 @@ def quiescence(position, alpha, beta, maximizingPlayer, qs_depth=0, max_qs_depth
     if maximizingPlayer:
         for move in captures:
             position.push(move)
-            score = quiescence(position, alpha, beta, False, qs_depth + 1, max_qs_depth)
+            score = quiescence(position, alpha, beta, False, qs_depth + 1, max_qs_depth, start_time, time_limit)
             position.pop()
             if score >= beta:
                 return beta
@@ -128,7 +145,7 @@ def quiescence(position, alpha, beta, maximizingPlayer, qs_depth=0, max_qs_depth
     else:
         for move in captures:
             position.push(move)
-            score = quiescence(position, alpha, beta, True, qs_depth + 1, max_qs_depth)
+            score = quiescence(position, alpha, beta, True, qs_depth + 1, max_qs_depth, start_time, time_limit)
             position.pop()
             if score <= alpha:
                 return alpha
