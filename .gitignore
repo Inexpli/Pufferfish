@@ -7,3 +7,4 @@ tablebases/gaviota/*
 tablebases/syzygy/*
 build/
 dist/
+uci_wrapper.spec

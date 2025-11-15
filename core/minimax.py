@@ -85,7 +85,7 @@ def minimax(position, depth, alpha, beta, maximizingPlayer, start_time=None, tim
         minEval = float('inf')
         for move in moves:
             position.push(move)
-            evaluation, child_nodes, _ = minimax(position, depth-1, alpha, beta, True, start_time, time_limit)  # Dodano parametry czasu
+            evaluation, child_nodes, _ = minimax(position, depth-1, alpha, beta, True, start_time, time_limit)
             nodes += child_nodes
             position.pop()
             if evaluation < minEval:
@@ -112,7 +112,7 @@ def quiescence(position, alpha, beta, maximizingPlayer, qs_depth=0, max_qs_depth
         start_time = time.time()
 
     if get_stop_flag() or (time_limit and (time.time() - start_time) * 1000 >= time_limit):
-        return evaluate_board(position)  # Dodano sprawdzanie flagi i czasu, zwracaj bieżącą ocenę
+        return evaluate_board(position)
 
     if qs_depth > max_qs_depth or position.is_game_over():
         return evaluate_board(position)
@@ -132,7 +132,7 @@ def quiescence(position, alpha, beta, maximizingPlayer, qs_depth=0, max_qs_depth
     if not captures:
         return stand_pat
     
-    captures = order_moves(position, captures)  # TODO: Można zoptymalizować na prostsze MVV/LVA
+    captures = order_moves(position, captures)
     
     if maximizingPlayer:
         for move in captures:

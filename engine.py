@@ -64,7 +64,7 @@ def engine_select(board_obj, white_to_move, depth, start_time=None, time_limit=N
             score, nodes, best_move = get_move_from_table(board_obj, tb)
             return score, nodes, best_move
     except Exception:
-        pass  # brak tablebase - lecimy dalej
+        pass
 
     model_move, confidence = predict_move_with_confidence(board_obj)
     if model_move is not None and confidence >= CONFIDENCE_THRESHOLD:
