@@ -155,7 +155,7 @@ Pufferfish wykorzystuje hybrydowe podejście łączące:
 4. **Tabela transpozycji** - cache obliczonych pozycji dla szybszego przeliczania powtarzających się pozycji
 
 ### Ewaluacja pozycji
-- **Heurystyki wartości figur** - podstawowa wycena materiału (pionek=1, skoczek/goniec=3, wieża=5, hetman=9)
+- **Heurystyki wartości figur** - wycena materiału (pionek=100, skoczek=320 goniec=330, wieża=500, hetman=900)
 - **Wartości pozycyjne** - bonusy/kary za pozycję każdej figury na planszy (piece-square tables)
 
 ### Sieć neuronowa
