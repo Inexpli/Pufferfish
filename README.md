@@ -193,8 +193,9 @@ Cały projekt jest na licencji MIT.
 
 ## 🙏 Podziękowania
 
+- Twórcom internetowym oraz youtuberom za inspiracje oraz publikacje materiałów odnośnie architektury silników szachowych
+- Społeczność chess programming za dokumentację oraz rady
 - PyTorch team za framework do deep learning
-- Społeczność chess programming za narzędzia i dokumentację
 
 ---
 
