@@ -3,6 +3,7 @@ import shlex
 import time
 from typing import Optional
 from core.utils import set_stop_flag, get_stop_flag
+from core.polyglot import get_opening_book_move
 from engine import engine_select, ZobristBoard, TB_DIR
 
 import chess
@@ -243,6 +244,17 @@ def uci_loop():
                     i += 1
 
             set_stop_flag(False)
+
+            try:
+                book_move = get_opening_book_move(cur_board)
+                if book_move is not None:
+                    uci_move = book_move.uci()
+                    print(f"info string book move {uci_move}")
+                    print(f"bestmove {uci_move}")
+                    sys.stdout.flush()
+                    continue
+            except Exception as e:
+                print(f"info string opening book error: {e}")
 
             chosen_move = None
             if depth is not None:
