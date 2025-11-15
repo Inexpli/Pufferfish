@@ -3,7 +3,6 @@ data/*
 /__pycache__/
 */__pycache__/
 */*/__pycache__/
-tablebases/*
 build/
 dist/
 uci_wrapper.spec
