@@ -1,35 +1,17 @@
 import sys
 import shlex
 import time
-import threading
 from typing import Optional
-
+from core.utils import set_stop_flag, get_stop_flag
 from engine import engine_select, ZobristBoard, TB_DIR
 
 import chess
 import chess.gaviota
 
 uci_running = True
-stop_search = False
-stop_lock = threading.Lock()
 
 DEFAULT_MAX_DEPTH = 5
 DEFAULT_DEPTH = 4
-
-def set_stop_flag(val: bool):
-    '''
-    Ustawia flagę zatrzymania wyszukiwania
-    '''
-    global stop_search
-    with stop_lock:
-        stop_search = val
-
-def get_stop_flag() -> bool:
-    '''
-    Zwraca stan flagi zatrzymania wyszukiwania
-    '''
-    with stop_lock:
-        return stop_search
 
 def iterative_deepening(
         board: ZobristBoard,
