@@ -1,33 +1,44 @@
+import torch
 import torch.nn as nn
+import torch.nn.functional as F
 
-class Model(nn.Module):
-    def __init__(self, num_of_indexes):
+HISTORY_LENGTH = 4
+GLOBAL_CHANNELS = 1
+INPUT_CHANNELS = 17 * HISTORY_LENGTH + GLOBAL_CHANNELS
+RESIDUAL_FILTERS = 128
+NUM_RESIDUAL_BLOCKS = 8
+NUM_MOVES = 4672
+
+class ResidualBlock(nn.Module):
+    def __init__(self, channels):
         super().__init__()
-        self.conv1 = nn.Conv2d(13, 64, kernel_size=3, padding=1)
-        self.conv2 = nn.Conv2d(64, 128, kernel_size=3, padding=1)
-        self.conv3 = nn.Conv2d(128, 256, kernel_size=3, padding=1)
-        self.flatten = nn.Flatten()
-        self.batch_norm1 = nn.BatchNorm2d(64)
-        self.batch_norm2 = nn.BatchNorm2d(128)
-        self.batch_norm3 = nn.BatchNorm2d(256)
-        self.fc1 = nn.Linear(8 * 8 * 256, 256)
-        self.fc2 = nn.Linear(256, num_of_indexes)
-        self.relu = nn.ReLU()
-
-        nn.init.kaiming_uniform_(self.conv1.weight, nonlinearity='relu')
-        nn.init.kaiming_uniform_(self.conv2.weight, nonlinearity='relu')
-        nn.init.xavier_uniform_(self.fc1.weight)
-        nn.init.xavier_uniform_(self.fc2.weight)
+        self.conv1 = nn.Conv2d(channels, channels, kernel_size=3, padding=1)
+        self.bn1 = nn.BatchNorm2d(channels)
+        self.conv2 = nn.Conv2d(channels, channels, kernel_size=3, padding=1)
+        self.bn2 = nn.BatchNorm2d(channels)
 
     def forward(self, x):
-        x = self.relu(self.conv1(x))
-        x = self.batch_norm1(x)
-        x = self.relu(self.conv2(x))
-        x = self.batch_norm2(x)
-        x = self.relu(self.conv3(x))
-        x = self.batch_norm3(x)
-        x = self.flatten(x)
-        x = self.relu(self.fc1(x))
-        x = self.fc2(x)
-        return x
+        residual = x
+        out = F.relu(self.bn1(self.conv1(x)))
+        out = self.bn2(self.conv2(out))
+        out += residual
+        out = F.relu(out)
+        return out
 
+class ChessPolicyNet(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.conv_in = nn.Conv2d(INPUT_CHANNELS, RESIDUAL_FILTERS, kernel_size=3, padding=1)
+        self.bn_in = nn.BatchNorm2d(RESIDUAL_FILTERS)
+
+        self.res_blocks = nn.Sequential(*[ResidualBlock(RESIDUAL_FILTERS) for _ in range(NUM_RESIDUAL_BLOCKS)])
+
+        self.conv_policy = nn.Conv2d(RESIDUAL_FILTERS, 73, kernel_size=1)
+        self.fc_policy = nn.Linear(8*8*73, NUM_MOVES)
+
+    def forward(self, x):
+        x = F.relu(self.bn_in(self.conv_in(x)))
+        x = self.res_blocks(x)
+        policy = F.relu(self.conv_policy(x))
+        policy = policy.view(policy.size(0), -1)
+        return self.fc_policy(policy)

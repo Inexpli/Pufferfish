@@ -1,0 +1,4 @@
+- [𐄂] Można zrobić flip board, co za tym idzie trzeba też zrobić flip output
+- [𐄂] Spróbować zooptymalizować LMDB na float16 zamiast float32 żeby zapisać więcej gier
+- [𐄂] Wytrenować model na większej ilości epochów i większej bazie pozycja:ruch
+- [✓] Przejść na FP16 (AMP) dla ROCm (chyba: torch.amp.GradScaler(device='cuda'))
