@@ -280,7 +280,7 @@ def write_lmdb(output_path="../../data/lmdb/", pgn_path="../../data/"):
 
     env = lmdb.open(
         output_path,
-        map_size=1024 * 1024 * 1024 * 15,  # 15 GB
+        map_size=1024 * 1024 * 1024 * 25,  # 45 GB
         subdir=True,
         lock=True,
         readonly=False,
