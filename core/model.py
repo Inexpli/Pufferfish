@@ -1,5 +1,6 @@
 import chess
-import torch
+import chess.gaviota
+import onnxruntime as ort
 from core.utils import resource_path
 from core.minimax import minimax
 from core.transposition_table import LRUCache, ZobristBoard
@@ -12,7 +13,6 @@ MODEL_PATH = resource_path("models/policy_network/BetaChess.pt")
 TB_DIR = resource_path("tablebases/gaviota")
 USE_CUDA = False  #torch.cuda.is_available()
 
-device = torch.device("cuda" if USE_CUDA else "cpu")
 transposition_table = LRUCache(maxsize=100000)
 
 model = Model()
@@ -58,12 +58,13 @@ def predict_move_with_confidence(board: chess.Board, model):
 
 def engine_select(board_obj, white_to_move, depth, start_time=None, time_limit=None):
     """
-    Wybiera ruch na podstawie tabeli końcówek Gaviota, wyuczonego modelu i algorytmu minimax.
+    Wybiera ruch na podstawie tabeli końcówek Gaviota, modelu ONNX i algorytmu minimax.
     """
     try:
         with chess.gaviota.open_tablebase(TB_DIR) as tb:
             score, nodes, best_move = get_move_from_table(board_obj, tb)
-            return score, nodes, best_move
+            if best_move is not None:
+                return score, nodes, best_move
     except Exception:
         pass
 
