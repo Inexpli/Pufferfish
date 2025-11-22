@@ -1,9 +1,7 @@
 import os
 import numpy as np
 import pandas as pd
-from tqdm.notebook import tqdm
 import torch
-import csv
 import chess
 
 import os
@@ -134,7 +132,7 @@ def load_data(path="../../data/", limit=100000):
 
     games, evaluations = load_games(limit)
 
-    for game, eval_ in tqdm(zip(games, evaluations), total=len(games), desc="Przetwarzanie pozycji"):
+    for game, eval_ in zip(games, evaluations):
         board_tensor = board_to_ndarray(game)
         X.append(board_tensor)
         y.append(eval_)
