@@ -101,8 +101,7 @@ Pufferfish/
 │   └── utils.py                   # Funkcje pomocnicze
 ├── models/
 │   ├── policy_network/
-│   |   ├── [model_name].pth       # Model sieci neuronowej do predykcji ruchu
-│   |   └── move_mapping.json      # Mapowanie ruchów
+│   |   └── [model_name].onnx      # Model sieci neuronowej do predykcji ruchu
 |   └── value_network/
 |       └── [model_name].pth       # Model sieci neuronowej do oceny pozycji
 ├── tablebases/
@@ -118,7 +117,9 @@ Pufferfish/
 ├── training/                      
 │   ├── policy_network/            # Trening sieci policy (przewidywanie ruchów)
 │   │   ├── data_manager.py        # Zarządzanie danymi treningowymi
+|   |   ├── data_parser.ipynb      # Przetwarzanie plików PGN do nauki modelu
 │   │   ├── dataset.py             # Dataset policy network
+|   |   ├── lmdb_dataset.py        # Konfiguracja bazy danych dla partii
 │   │   ├── model.py               # Architektura sieci policy
 │   │   ├── test_model.ipynb       # Testy modelu policy
 │   │   └── train_model.ipynb      # Notebook treningu policy network
@@ -131,6 +132,7 @@ Pufferfish/
 │       └── train_model.ipynb      # Notebook treningu value network
 ├── .gitignore                     # Pliki ignorowane przez Git
 ├── README.md                      # Właśnie czytasz ten plik
+├── export_onnx.ipynb              # Konwersja modelu PyTorch na ONNX
 ├── pufferfish.py                  # Główny plik UCI
 ├── pufferfish.spec                # Specyfikacja dla PyInstaller
 └── requirements.txt               # Zależności Python
