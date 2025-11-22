@@ -1,9 +1,8 @@
 import os
-from chess import pgn
 import numpy as np
 import chess
-from tqdm.notebook import tqdm
-import torch
+from chess import pgn
+
 
 piece_to_idx = {
     chess.PAWN: 0, chess.KNIGHT: 1, chess.BISHOP: 2,
@@ -12,7 +11,8 @@ piece_to_idx = {
 
 def board_to_ndarray(board) -> np.ndarray:
     """ 
-    Zamienia szachownicę na tensor 8x8x13
+    Zamienia szachownicę na macierz 8x8x13
+
     Tensor ma 13 kanałów:
     - 6 kanałów dla białych figur (0-5)
     - 6 kanałów dla czarnych figur (6-11)
@@ -33,13 +33,16 @@ def board_to_ndarray(board) -> np.ndarray:
         tensor[7 - (to_sq // 8), to_sq % 8, 12] = 1.0
     return tensor
 
-def board_to_tensor(board: chess.Board) -> torch.Tensor:
+def board_to_tensor(board: chess.Board) -> np.ndarray:
     """
-    Zamienia szachownicę na tensor [1, 13, 8, 8].
+    Zamienia szachownicę na input zgodny z ONNX [1, 13, 8, 8].
+    Zastępuje wersję Torchową wersją NumPy.
     """
-    ndarray = board_to_ndarray(board)  # (8, 8, 13)
-    tensor = torch.tensor(ndarray, dtype=torch.float32).permute(2, 0, 1)  # (13, 8, 8)
-    return tensor.unsqueeze(0)  # (1, 13, 8, 8)
+    ndarray = board_to_ndarray(board)
+    transposed = np.transpose(ndarray, (2, 0, 1))
+    final_input = np.expand_dims(transposed, axis=0)
+    
+    return final_input.astype(np.float32)
 
 def move_to_index(move):
     """
@@ -49,7 +52,6 @@ def move_to_index(move):
     to_sq = move.to_square      
     index = from_sq * 64 + to_sq
     return index
-
 
 def index_to_move(index):
     """
@@ -62,7 +64,7 @@ def index_to_move(index):
 def get_data_shapes(X,y):
     """
     Zwraca kształty danych X i y,
-    przydaje się do sprawdzenia poprawności danych
+    przydaje się do sprawdzenia poprawności danych.
     """
     return {
     "X_shape": np.array(X).shape,
@@ -83,9 +85,15 @@ def get_num_indexes(y):
     return len(np.unique(y))
 
 def load_games(path="../../data/"):
+    """
+    Ładuje partie z plików PGN.
+    """
+    if not os.path.exists(path):
+        return []
     files = [file for file in os.listdir(path) if file.endswith(".pgn")]
     games = []
-    for file in tqdm(files, desc="Przetwarzanie plików PGN"):
+    print("Wczytywanie gier...")
+    for file in files:
         with open(f"{path}/{file}", 'r') as pgn_file:
             while True:
                 game = pgn.read_game(pgn_file)
@@ -96,10 +104,10 @@ def load_games(path="../../data/"):
 
 def load_data(path="../../data/"):
     """
-    Wczytuje dane z listy gier i zwraca listę tensorów i etykiet
+    Wczytuje dane z listy gier i zwraca listę tensorów i etykiet.
     """
-    X = []  # Cechy
-    y = []  # Etykiety
+    X = []
+    y = []
     games = load_games(path)
     
     for game in games:
