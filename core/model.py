@@ -1,5 +1,3 @@
-import json
-import numpy as np
 import chess
 import chess.gaviota
 import onnxruntime as ort
@@ -7,70 +5,56 @@ from core.utils import resource_path
 from core.minimax import minimax
 from core.transposition_table import LRUCache, ZobristBoard
 from core.gaviota import get_move_from_table
-from training.policy_network.data_manager import board_to_tensor, index_to_move
+from training.policy_network.data_manager import  board_to_ndarray_with_history, move_to_index, index_to_move
+from training.policy_network.model import ChessPolicyNet as Model
 
-CONFIDENCE_THRESHOLD = 0.7
-MODEL_PATH = resource_path("models/policy_network/CN2_BN2_RLROP.onnx")
+CONFIDENCE_THRESHOLD = 0.30
+MODEL_PATH = resource_path("models/policy_network/BetaChess.pt")
 TB_DIR = resource_path("tablebases/gaviota")
-MOVE_MAPPING = resource_path("models/policy_network/move_mapping.json")
+USE_CUDA = False  #torch.cuda.is_available()
 
 transposition_table = LRUCache(maxsize=100000)
 
-with open(MOVE_MAPPING, "r") as f:
-    int_to_move = json.load(f)
+model = Model()
+model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
+model.to(device)
+model.eval()
+torch.set_grad_enabled(False)
 
-try:
-    ort_session = ort.InferenceSession(MODEL_PATH, providers=['CPUExecutionProvider'])
-    input_name = ort_session.get_inputs()[0].name
-except Exception as e:
-    print(f"Błąd ładowania modelu ONNX: {e}")
-    ort_session = None
+def predict_move_with_confidence(board: chess.Board, model):
+	"""
+	Na podstawie szachownicy robi predykcję najlepszego ruchu.
+	"""
+	tensor = board_to_ndarray_with_history(board)
+	tensor = torch.tensor(tensor, dtype=torch.float32)
+	tensor = tensor.permute(2, 0, 1)
+	tensor = tensor.unsqueeze(0).to(device)
 
-def softmax(x):
-    """
-    Implementacja softmax na bibliotece NumPy zamiast torch.softmax.
-    """
-    e_x = np.exp(x - np.max(x))
-    return e_x / e_x.sum()
+	with torch.no_grad():
+		logits = model(tensor)[0]
 
-def predict_move_with_confidence(board: chess.Board):
-    """
-    Zwraca przewidziany ruch i confidence używając ONNX Runtime.
-    """
-    if ort_session is None:
-        return None, None
+		# Legalne ruchy
+		legal_moves = list(board.legal_moves)
+		legal_indices = [move_to_index(mv) for mv in legal_moves]
 
-    X_input = board_to_tensor(board)
+		# Maskowanie nielegalnych ruchów
+		mask = torch.full_like(logits, float('-inf'))
+		mask[legal_indices] = 0
+		masked_logits = logits + mask
 
-    if hasattr(X_input, 'cpu'):
-        X_input = X_input.cpu().detach().numpy()
-    elif not isinstance(X_input, np.ndarray):
-        X_input = np.array(X_input)
+		# Wyznaczenie prawdopodobieństw tylko legalnych ruchów
+		legal_logits = masked_logits[legal_indices]
+		legal_probs = torch.softmax(legal_logits, dim=0)
 
-    X_input = X_input.astype(np.float32)
+		# Najlepszy ruch
+		best_idx_within_legal = torch.argmax(legal_probs).item()
+		best_move_index = legal_indices[best_idx_within_legal]
+		best_move = index_to_move(best_move_index, board)
 
-    try:
-        logits = ort_session.run(None, {input_name: X_input})[0]
-        
-        probabilities = softmax(logits.squeeze(0))
-        
-        sorted_indices = np.argsort(probabilities)[::-1]
-        legal_moves = list(board.legal_moves)
+		# Prawdopodobieństwo najlepszego ruchu
+		confidence = legal_probs[best_idx_within_legal].item()
 
-        for idx in sorted_indices:
-            move_idx_str = str(idx)
-            if move_idx_str in int_to_move:
-                predicted_uci = index_to_move(int(int_to_move[move_idx_str])).uci()
-                move = chess.Move.from_uci(predicted_uci)
-                
-                if move in legal_moves:
-                    return move, probabilities[idx]
-
-    except Exception as e:
-        print(f"Błąd inferencji: {e}") 
-        pass
-
-    return None, None
+		return best_move, confidence
 
 def engine_select(board_obj, white_to_move, depth, start_time=None, time_limit=None):
     """
@@ -84,12 +68,9 @@ def engine_select(board_obj, white_to_move, depth, start_time=None, time_limit=N
     except Exception:
         pass
 
-    model_move, confidence = predict_move_with_confidence(board_obj)
-    
-    if model_move is not None and confidence is not None and confidence >= CONFIDENCE_THRESHOLD:
-        reduced_depth = max(1, depth // 2)
-        score, nodes, best_move = minimax(board_obj, reduced_depth, float('-inf'), float('inf'), white_to_move, start_time, time_limit)
-        
+    model_move, confidence = predict_move_with_confidence(board_obj, model)
+    if model_move is not None and confidence >= CONFIDENCE_THRESHOLD:
+        score, nodes, best_move = minimax(board_obj, depth // 2, float('-inf'), float('inf'), white_to_move, start_time, time_limit)
         if best_move == model_move:
             return score, nodes, best_move
     
