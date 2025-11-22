@@ -24,7 +24,7 @@ class LMDBDataset(Dataset):
 
         sample = pickle.loads(data)
         
-        x = torch.tensor(sample["x"], dtype=torch.float16).permute(2, 0, 1)
+        x = torch.tensor(sample["x"], dtype=torch.float32).permute(2, 0, 1)
         y = torch.tensor(sample["y"], dtype=torch.long)
 
         return x, y

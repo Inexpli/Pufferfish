@@ -1,7 +1,7 @@
 # -*- mode: python ; coding: utf-8 -*-
 from PyInstaller.utils.hooks import collect_all
 
-datas = [('models/policy_network/CN2_BN2_RLROP.pth', 'models/policy_network'), ('models/policy_network/move_mapping.json', 'models/policy_network'), ('tablebases/gaviota', 'tablebases/gaviota'), ('tablebases/polyglot', 'tablebases/polyglot')]
+datas = [('models/policy_network/BetaChess.pt', 'models/policy_network'), ('tablebases/gaviota', 'tablebases/gaviota'), ('tablebases/polyglot', 'tablebases/polyglot')]
 binaries = []
 hiddenimports = ['torch']
 tmp_ret = collect_all('torch')

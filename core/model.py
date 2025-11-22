@@ -1,51 +1,60 @@
-import json
-import numpy as np
 import chess
 import torch
 from core.utils import resource_path
 from core.minimax import minimax
 from core.transposition_table import LRUCache, ZobristBoard
 from core.gaviota import get_move_from_table
-from training.policy_network.data_manager import board_to_tensor, index_to_move
-from training.policy_network.model import Model
+from training.policy_network.data_manager import  board_to_ndarray_with_history, move_to_index, index_to_move
+from training.policy_network.model import ChessPolicyNet as Model
 
-CONFIDENCE_THRESHOLD = 0.7
-MODEL_PATH = resource_path("models/policy_network/CN2_BN2_RLROP.pth")
+CONFIDENCE_THRESHOLD = 0.30
+MODEL_PATH = resource_path("models/policy_network/BetaChess.pt")
 TB_DIR = resource_path("tablebases/gaviota")
-MOVE_MAPPING = resource_path("models/policy_network/move_mapping.json")
 USE_CUDA = False  #torch.cuda.is_available()
 
 device = torch.device("cuda" if USE_CUDA else "cpu")
 transposition_table = LRUCache(maxsize=100000)
 
-with open(MOVE_MAPPING, "r") as f:
-    int_to_move = json.load(f)
-
-model = Model(len(int_to_move))
+model = Model()
 model.load_state_dict(torch.load(MODEL_PATH, map_location=device))
 model.to(device)
 model.eval()
 torch.set_grad_enabled(False)
 
-def predict_move_with_confidence(board: chess.Board):
-    """
-    Zwraca przewidziany ruch i confidence.
-    """
-    X_tensor = board_to_tensor(board).to(device)
-    with torch.no_grad():
-        logits = model(X_tensor)
-    
-    probabilities = torch.softmax(logits.squeeze(0), dim=0).cpu().numpy()
-    sorted_indices = np.argsort(probabilities)[::-1]
-    legal_moves = list(board.legal_moves)
+def predict_move_with_confidence(board: chess.Board, model):
+	"""
+	Na podstawie szachownicy robi predykcję najlepszego ruchu.
+	"""
+	tensor = board_to_ndarray_with_history(board)
+	tensor = torch.tensor(tensor, dtype=torch.float32)
+	tensor = tensor.permute(2, 0, 1)
+	tensor = tensor.unsqueeze(0).to(device)
 
-    for idx in sorted_indices:
-        move_index = int(int_to_move[str(idx)])
-        move = chess.Move.from_uci(index_to_move(move_index).uci())
-        if move in legal_moves:
-            return move, probabilities[idx]
+	with torch.no_grad():
+		logits = model(tensor)[0]
 
-    return None, None
+		# Legalne ruchy
+		legal_moves = list(board.legal_moves)
+		legal_indices = [move_to_index(mv) for mv in legal_moves]
+
+		# Maskowanie nielegalnych ruchów
+		mask = torch.full_like(logits, float('-inf'))
+		mask[legal_indices] = 0
+		masked_logits = logits + mask
+
+		# Wyznaczenie prawdopodobieństw tylko legalnych ruchów
+		legal_logits = masked_logits[legal_indices]
+		legal_probs = torch.softmax(legal_logits, dim=0)
+
+		# Najlepszy ruch
+		best_idx_within_legal = torch.argmax(legal_probs).item()
+		best_move_index = legal_indices[best_idx_within_legal]
+		best_move = index_to_move(best_move_index, board)
+
+		# Prawdopodobieństwo najlepszego ruchu
+		confidence = legal_probs[best_idx_within_legal].item()
+
+		return best_move, confidence
 
 def engine_select(board_obj, white_to_move, depth, start_time=None, time_limit=None):
     """
@@ -58,7 +67,7 @@ def engine_select(board_obj, white_to_move, depth, start_time=None, time_limit=N
     except Exception:
         pass
 
-    model_move, confidence = predict_move_with_confidence(board_obj)
+    model_move, confidence = predict_move_with_confidence(board_obj, model)
     if model_move is not None and confidence >= CONFIDENCE_THRESHOLD:
         score, nodes, best_move = minimax(board_obj, depth // 2, float('-inf'), float('inf'), white_to_move, start_time, time_limit)
         if best_move == model_move:

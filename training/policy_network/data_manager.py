@@ -22,6 +22,7 @@ def board_to_ndarray_with_history(board_history: list[chess.Board], history_leng
     - 4 kanały na prawa do roszady
     
     - 1 globalny kanał przeznaczony do regresji zaniku brzegów planszy
+
     To razem daje 4x17+1 = 69 kanałów -> (69x8x8)
     """
     if isinstance(board_history, chess.Board):
@@ -273,14 +274,14 @@ def index_to_move(index: int, board: chess.Board = None) -> chess.Move:
 
 def write_lmdb(output_path="../../data/lmdb/", pgn_path="../../data/"):
     """
-    Zapisuje cechy oraz etykiety z partii PGN do LMDB
+    Zapisuje cechy oraz etykiety z partii PGN do LMDB.
     """
 
     os.makedirs(output_path, exist_ok=True)
 
     env = lmdb.open(
         output_path,
-        map_size=1024 * 1024 * 1024 * 25,  # 45 GB
+        map_size=1024 * 1024 * 1024 * 45,  # 45 GB
         subdir=True,
         lock=True,
         readonly=False,
