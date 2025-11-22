@@ -4,7 +4,7 @@ import time
 from typing import Optional
 from core.utils import set_stop_flag, get_stop_flag
 from core.polyglot import get_opening_book_move
-from engine import engine_select, ZobristBoard, TB_DIR
+from core.model import engine_select, ZobristBoard, TB_DIR
 
 import chess
 import chess.gaviota

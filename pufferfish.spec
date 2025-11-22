@@ -1,19 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
-from PyInstaller.utils.hooks import collect_all
-
-datas = [('models/policy_network/CN2_BN2_RLROP.pth', 'models/policy_network'), ('models/policy_network/move_mapping.json', 'models/policy_network'), ('tablebases/gaviota', 'tablebases/gaviota'), ('tablebases/polyglot', 'tablebases/polyglot')]
-binaries = []
-hiddenimports = ['torch']
-tmp_ret = collect_all('torch')
-datas += tmp_ret[0]; binaries += tmp_ret[1]; hiddenimports += tmp_ret[2]
 
 
 a = Analysis(
     ['pufferfish.py'],
     pathex=[],
-    binaries=binaries,
-    datas=datas,
-    hiddenimports=hiddenimports,
+    binaries=[],
+    datas=[('models/policy_network/BetaChess.onnx', 'models/policy_network'), ('tablebases/gaviota', 'tablebases/gaviota'), ('tablebases/polyglot', 'tablebases/polyglot')],
+    hiddenimports=['onnxruntime'],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
