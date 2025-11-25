@@ -35,7 +35,7 @@ cd Pufferfish/
 pip install -r requirements.txt
 ```
 
-### Krok 3: Zbuduj wykonywalny plik (opcjonalnie)
+### Krok 3: Zbuduj wykonywalny plik
 
 Aby utworzyć standalone wykonywalny silnik:
 
