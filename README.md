@@ -1,76 +1,78 @@
 # Pufferfish ♟️
+![Python](https://img.shields.io/badge/python-3.8+-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-Hybrydowy silnik szachowy łączący algorytm minimax z alpha-beta pruning ze wsparciem sieci neuronowej do predykcji najlepszych ruchów.
+A hybrid chess engine combining the minimax algorithm with alpha-beta pruning, supported by a neural network for best move prediction.
 
-## 🎯 Cechy
+## 🎯 Features
 
-- **Architektura hybrydowa**: Algorytm minimax z alpha-beta pruning wspomagany siecią neuronową
-- **Zaawansowane techniki wyszukiwania**: Quiescence search i move ordering dla lepszej wydajności
-- **Tabela transpozycji**: Przechowywanie obliczonych pozycji dla szybszego przeliczania ruchów
-- **Ewaluacja pozycji**: Heurystyki wartości figur oraz wartości pozycyjnej dla każdej figury
-- **Sieć neuronowa**: Model PyTorch przewidujący najlepsze ruchy na podstawie pozycji
-- **Zgodność UCI**: Pełna implementacja protokołu Universal Chess Interface
-- **Bazy końcówkowe**: Wsparcie dla Gaviota tablebases
-- **Książki otwarć**: Integracja z Polyglot opening books
-- **Cross-platform**: Działa na systemach Windows, Linux i macOS
+- **Hybrid Architecture**: Minimax algorithm with alpha-beta pruning assisted by a neural network
+- **Advanced Search Techniques**: Quiescence search and move ordering for better performance
+- **Transposition Table**: Storage of calculated positions for faster move calculation
+- **Position Evaluation**: Piece value heuristics and positional values for each piece
+- **Neural Network**: PyTorch model predicting the best moves based on the position
+- **UCI Compliance**: Full implementation of the Universal Chess Interface protocol
+- **Tablebases**: Support for Gaviota tablebases
+- **Opening Books**: Integration with Polyglot opening books
+- **Cross-platform**: Runs on Windows, Linux, and macOS
 
-## 📋 Wymagania
+## 📋 Requirements
 
-- Python 3.8 lub nowszy
+- Python 3.8 or newer
 - PyTorch
-- Dodatkowe zależności wymienione w `requirements.txt`
+- Additional dependencies listed in `requirements.txt`
 
-## 🚀 Instalacja
+## 🚀 Installation
 
-### Krok 1: Sklonuj repozytorium
+### Step 1: Clone the repository
 
 ```bash
-git clone https://github.com/Inexpli/Pufferfish.git
+git clone [https://github.com/Inexpli/Pufferfish.git](https://github.com/Inexpli/Pufferfish.git)
 cd Pufferfish/
 ```
 
-### Krok 2: Zainstaluj zależności
+### Step 2: Install dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
-### Krok 3: Zbuduj wykonywalny plik
+### Step 3: Build the executable
 
-Aby utworzyć standalone wykonywalny silnik:
+To create a standalone executable engine:
 
 ```bash
 pyinstaller pufferfish.spec
 ```
 
-**Uwaga**: Podczas tworzenia pliku wykonywalnego możesz spodziewać się sporej liczby ostrzeżeń, nie przejmuj się jednak gdyż to normalne w przypadku **PyInstaller'a**.
+Note: You may expect a large number of warnings during the executable creation; do not worry, as this is normal for PyInstaller.
 
-### Krok 4: Eksportuj silnik
+### Step 4: Export the engine
 
-Po zakończeniu kompilacji, wykonywalny silnik znajdziesz w folderze `dist/uci_wrapper/`.
+After compilation is complete, you will find the executable engine in the `dist/uci_wrapper/` folder.
 
-## 🎮 Użycie
+## 🎮 Usage
 
-### Tryb UCI (z interfejsem graficznym)
+### UCI Mode (with Graphical Interface)
 
-Pufferfish można używać z dowolnym GUI wspierającym protokół UCI, takim jak:
+Pufferfish can be used with any GUI supporting the UCI protocol, such as:
 - Arena Chess GUI
 - Cute Chess
 - ChessBase
-- Lichess (poprzez Lichess-Bot)
+- Lichess (via Lichess-Bot)
 - Chess.com
 
-W ustawieniach GUI dodaj silnik wskazując na:
-- **Plik źródłowy**: `pufferfish.py` (Python)
-- **Wykonywalny**: `dist/pufferfish/pufferfish.exe` (Windows) lub `dist/pufferfish/pufferfish` (Linux/Mac)
+In the GUI settings, add the engine pointing to:
+- **Source file:**: `pufferfish.py` (Python)
+- **Executable**: `dist/pufferfish/pufferfish.exe` (Windows) or `dist/pufferfish/pufferfish` (Linux/Mac)
 
-### Tryb CLI (wiersz poleceń)
+### CLI Mode (Command Line)
 
 ```bash
 python pufferfish.py
 ```
 
-Podstawowe komendy UCI:
+Basic UCI commands:
 ```
 uci                # Informacje o silniku
 isready            # Sprawdzenie gotowości
@@ -80,125 +82,125 @@ go movetime 3000   # Szukaj przez 3 sekundy
 quit               # Wyjście
 ```
 
-## 📁 Struktura projektu
+## 📁 Project Structure
 ```
 Pufferfish/
-├── charts/                        # Dane i wykresy z procesu uczenia
+├── charts/                        # Data and charts from the training process
 │   ├── policy_network/
-│   |   ├── [model_name].csv       # Metryki dla każdego modelu (loss, accuracy, itp.)
-│   |   └── read_chart.ipynb       # Jupyter notebook do odczytania danych
+│   |   ├── [model_name].csv       # Metrics for each model (loss, accuracy, etc.)
+│   |   └── read_chart.ipynb       # Jupyter notebook for reading data
 |   └── value_network/
-|       └── [model_name].csv       # Metryka dla modelu (loss, accuracy, itp.)
+|       └── [model_name].csv       # Metric for the model (loss, accuracy, etc.)
 ├── core/                          
-│   ├── evaluation.py              # Funkcje ewaluacji pozycji
-│   ├── minimax.py                 # Algorytm Minimax z alpha-beta pruning i QS
-│   ├── transposition_table.py     # Tabela transpozycji dla optymalizacji przeszukiwania
-│   ├── heuristics.py              # Heurystyki ewaluacji (materiał, pozycja, itp.)
-│   ├── model.py                   # Integracja modeli ML z silnikiem
-│   ├── gaviota.py                 # Obsługa baz końcówkowych Gaviota
-│   ├── polyglot.py                # Obsługa opening books Polyglot
-│   ├── syzygy.py                  # Obsługa baz końcówkowych Syzygy
-│   └── utils.py                   # Funkcje pomocnicze
+│   ├── evaluation.py              # Position evaluation functions
+│   ├── minimax.py                 # Minimax algorithm with alpha-beta pruning and QS
+│   ├── transposition_table.py     # Transposition table for search optimization
+│   ├── heuristics.py              # Evaluation heuristics (material, position, etc.)
+│   ├── model.py                   # Integration of ML models with the engine
+│   ├── gaviota.py                 # Handling Gaviota tablebases
+│   ├── polyglot.py                # Handling Polyglot opening books
+│   ├── syzygy.py                  # Handling Syzygy tablebases
+│   └── utils.py                   # Utility functions
 ├── models/
 │   ├── policy_network/
-│   |   └── [model_name].onnx      # Model sieci neuronowej do predykcji ruchu
+│   |   └── [model_name].onnx      # Neural network model for move prediction
 |   └── value_network/
-|       └── [model_name].pth       # Model sieci neuronowej do oceny pozycji
+|       └── [model_name].pth       # Neural network model for position evaluation
 ├── tablebases/
-│   ├── gaviota/                   # Bazy końcówkowe Gaviota
-│   └── polyglot/                  # Opening books Polyglot
+│   ├── gaviota/                   # Gaviota tablebases
+│   └── polyglot/                  # Polyglot opening books
 ├── tests/                         
-│   ├── methods.ipynb              # Testy wydajności różnych implementacji minimax
-│   ├── minimax_opt.ipynb          # Optymalizacja algorytmu minimax
-│   ├── nodes.ipynb                # Analiza przeszukiwanych węzłów
-│   ├── gaviota.ipynb              # Testy integracji z bazami Gaviota
-│   ├── polyglot.ipynb             # Testy integracji z opening books
-│   └── syzygy.ipynb               # Testy integracji z bazami Syzygy
+│   ├── methods.ipynb              # Performance tests of various minimax implementations
+│   ├── minimax_opt.ipynb          # Minimax algorithm optimization
+│   ├── nodes.ipynb                # Analysis of searched nodes
+│   ├── gaviota.ipynb              # Integration tests with Gaviota bases
+│   ├── polyglot.ipynb             # Integration tests with opening books
+│   └── syzygy.ipynb               # Integration tests with Syzygy bases
 ├── training/                      
-│   ├── policy_network/            # Trening sieci policy (przewidywanie ruchów)
-│   │   ├── data_manager.py        # Zarządzanie danymi treningowymi
-|   |   ├── data_parser.ipynb      # Przetwarzanie plików PGN do nauki modelu
-│   │   ├── dataset.py             # Dataset policy network
-|   |   ├── lmdb_dataset.py        # Konfiguracja bazy danych dla partii
-│   │   ├── model.py               # Architektura sieci policy
-│   │   ├── test_model.ipynb       # Testy modelu policy
-│   │   └── train_model.ipynb      # Notebook treningu policy network
-│   └── value_network/             # Trening sieci value (ewaluacja pozycji)
-│       ├── data_manager.py        # Zarządzanie danymi treningowymi
-│       ├── dataset.py             # Dataset value network
-│       ├── model.py               # Architektura sieci value
-│       ├── test_minimax.ipynb     # Testy integracji value network z minimax
-│       ├── test_model.ipynb       # Testy modelu value
-│       └── train_model.ipynb      # Notebook treningu value network
-├── .gitignore                     # Pliki ignorowane przez Git
-├── README.md                      # Właśnie czytasz ten plik
-├── export_onnx.ipynb              # Konwersja modelu PyTorch na ONNX
-├── pufferfish.py                  # Główny plik UCI
-├── pufferfish.spec                # Specyfikacja dla PyInstaller
-└── requirements.txt               # Zależności Python
+│   ├── policy_network/            # Training policy network (move prediction)
+│   │   ├── data_manager.py        # Training data management
+|   |   ├── data_parser.ipynb      # Processing PGN files for model learning
+│   │   ├── dataset.py             # Policy network dataset
+|   |   ├── lmdb_dataset.py        # Database configuration for games
+│   │   ├── model.py               # Policy network architecture
+│   │   ├── test_model.ipynb       # Policy model tests
+│   │   └── train_model.ipynb      # Policy network training notebook
+│   └── value_network/             # Training value network (position evaluation)
+│       ├── data_manager.py        # Training data management
+│       ├── dataset.py             # Value network dataset
+│       ├── model.py               # Value network architecture
+│       ├── test_minimax.ipynb     # Value network integration tests with minimax
+│       ├── test_model.ipynb       # Value model tests
+│       └── train_model.ipynb      # Value network training notebook
+├── .gitignore                     # Files ignored by Git
+├── README.md                      # You are reading this file
+├── export_onnx.ipynb              # PyTorch model conversion to ONNX
+├── pufferfish.py                  # Main UCI file
+├── pufferfish.spec                # Specification for PyInstaller
+└── requirements.txt               # Python dependencies
 ```
 
-### Kluczowe komponenty
+### Key Components
 
-- **engine.py** - Serce projektu łączące tradycyjne techniki szachowe (minimax, alpha-beta pruning, tabele transpozycji) z predykcjami sieci neuronowej, implementujące hybrydowe podejście do ewaluacji pozycji
-- **core/** - Moduły logiki silnika wykorzystujące bibliotekę python-chess do reprezentacji gry, z własnymi implementacjami algorytmów przeszukiwania, ewaluacji oraz integracją z bazami otwarć i końcówek
-- **training/** - Kompletny pipeline do trenowania dwóch typów sieci: policy network (przewidywanie najlepszych ruchów) oraz value network (ewaluacja pozycji)
-- **charts/** - Wizualizacje procesu uczenia umożliwiające monitorowanie konwergencji i identyfikację problemów
-- **tests/** - Notebooki z eksperymentami optymalizacyjnymi, testami wydajności różnych implementacji oraz integracją z bazami danych szachowych
+- **engine.py** - The heart of the project combining traditional chess techniques (minimax, alpha-beta pruning, transposition tables) with neural network predictions, implementing a hybrid approach to position evaluation.
+- **core/** - Engine logic modules using the python-chess library for game representation, with custom implementations of search algorithms, evaluation, and integration with opening and endgame databases.
+- **training/** - Complete pipeline for training two types of networks: policy network (predicting best moves) and value network (position evaluation).
+- **charts/** - Training process visualizations enabling convergence monitoring and issue identification.
+- **tests/** - Notebooks with optimization experiments, performance tests of various implementations, and integration with chess databases.
 
-## 🧠 Architektura
+## 🧠 Architecture
 
-Pufferfish wykorzystuje hybrydowe podejście łączące:
+Pufferfish uses a hybrid approach combining:
 
-### Algorytm przeszukiwania
-1. **Minimax z alpha-beta pruning** - efektywne przeszukiwanie drzewa gier z eliminacją nieistotnych gałęzi
-2. **Quiescence search** - dodatkowe przeszukiwanie w "niespokojnych" pozycjach (bicia, szachy)
-3. **Move ordering** - inteligentna kolejność analizy ruchów dla lepszego przycinania
-4. **Tabela transpozycji** - cache obliczonych pozycji dla szybszego przeliczania powtarzających się pozycji
+### Search Algorithm
+1. **Minimax with alpha-beta pruning** - efficient game tree search with elimination of irrelevant branches.
+2. **Quiescence search** - additional search in "unquiet" positions (captures, checks).
+3. **Move ordering** - intelligent move analysis order for better pruning.
+4. **Transposition table** - cache of calculated positions for faster recalculation of repeating positions.
 
-### Ewaluacja pozycji
-- **Heurystyki wartości figur** - wycena materiału (pionek=100, skoczek=320 goniec=330, wieża=500, hetman=900)
-- **Wartości pozycyjne** - bonusy/kary za pozycję każdej figury na planszy (piece-square tables)
+### Position Evaluation
+- **Piece value heuristics** - material valuation (pawn=100, knight=320, bishop=330, rook=500, queen=900).
+- **Positional values** - bonuses/penalties for the position of each piece on the board (piece-square tables).
 
-### Sieć neuronowa
-- **Model PyTorch** trenowany do predykcji najlepszych ruchów
-- **Wejście**: Reprezentacja aktualnej pozycji na planszy
-- **Wyjście**: Prawdopodobieństwa dla możliwych ruchów
-- **Integracja**: Sieć wspomaga klasyczny algorytm w wyborze najlepszych wariantów
+### Neural Network
+- **PyTorch model** trained to predict the best moves
+- **Input**: Representation of the current board position
+- **Output**: Probabilities for possible moves
+- **Integration**: The network assists the classic algorithm in selecting the best variations
 
-### Bazy danych
-- **Gaviota tablebases** - optymalna gra w końcówkach (do 5 figur)
-- **Polyglot opening books** - sprawdzone warianty otwarć
+### Databases
+- **Gaviota tablebases** - optimal play in endgames (up to 5 pieces)
+- **Polyglot opening books** - proven opening variations
 
-## ⚙️ Konfiguracja
+## ⚙️ Configuration
 
-Silnik można skonfigurować poprzez standardowe opcje UCI. Dostępne parametry zależą od implementacji i mogą być ustawione w GUI lub poprzez komendę `setoption`.
+The engine can be configured via standard UCI options. Available parameters depend on implementation and can be set in the GUI or via the `setoption` command.
 
-## 🤝 Wkład w rozwój
+## 🤝 Contributing
 
-Wkład w rozwój projektu jest mile widziany! Jeśli chcesz pomóc:
+Contribution to the project's development is welcome! If you want to help:
 
-1. Fork repozytorium
-2. Stwórz branch dla swojej funkcjonalności (`git checkout -b feature/NazwaFunkcjonalnosci`)
-3. Commituj zmiany (`git commit -m 'Dodaj nową funkcjonalność'`)
-4. Push do brancha (`git push origin feature/NazwaFunkcjonalnosci`)
-5. Otwórz Pull Request
+1. Fork the repository
+2. Create a branch for your feature (`git checkout -b feature/FeatureName`)
+3. Commit your changes (`git commit -m 'Add new feature'`)
+4. Push to the branch (`git push origin feature/FeatureName`)
+5. Open a Pull Request
 
-## 📝 Licencja
+## 📝 License
 
-Cały projekt jest na licencji MIT.
+The entire project is under the MIT license.
 
-## 📧 Kontakt
+## 📧 Contact
 
 - GitHub: [@Inexpli](https://github.com/Inexpli)
-- Repozytorium: [https://github.com/Inexpli/Pufferfish](https://github.com/Inexpli/Pufferfish)
+- Repository: [https://github.com/Inexpli/Pufferfish](https://github.com/Inexpli/Pufferfish)
 
 ## 🙏 Podziękowania
 
-- Twórcom internetowym oraz youtuberom za inspiracje oraz publikacje materiałów odnośnie architektury silników szachowych
-- Społeczność chess programming za dokumentację oraz rady
-- PyTorch team za framework do deep learning
+- Internet creators and YouTubers for inspiration and publishing materials regarding chess engine architecture
+- The chess programming community for documentation and advice
+- The PyTorch team for the deep learning framework
 
 ---
 
-**Uwaga**: W przyszłości niektóre funkcje mogą ulec zmianie.
+**Note**: Some features may change in the future.
