@@ -74,12 +74,12 @@ python pufferfish.py
 
 Basic UCI commands:
 ```
-uci                # Informacje o silniku
-isready            # Sprawdzenie gotowości
-ucinewgame         # Nowa partia
-position startpos  # Pozycja startowa
-go movetime 3000   # Szukaj przez 3 sekundy
-quit               # Wyjście
+uci                # Engine information
+isready            # Check readiness
+ucinewgame         # New game
+position startpos  # Start position
+go movetime 3000   # Search for 3 seconds
+quit               # Exit
 ```
 
 ## 📁 Project Structure
