@@ -195,7 +195,7 @@ The entire project is under the MIT license.
 - GitHub: [@Inexpli](https://github.com/Inexpli)
 - Repository: [https://github.com/Inexpli/Pufferfish](https://github.com/Inexpli/Pufferfish)
 
-## 🙏 Podziękowania
+## 🙏 Acknowledgments
 
 - Internet creators and YouTubers for inspiration and publishing materials regarding chess engine architecture
 - The chess programming community for documentation and advice
