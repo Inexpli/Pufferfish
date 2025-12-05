@@ -8,6 +8,9 @@ A hybrid chess engine combining the minimax algorithm with alpha-beta pruning, s
 
 <div align="center">
 <img width="500" height="500" alt="image" src="https://images.chesscomfiles.com/uploads/game-gifs/90px/green/neo/0/cc/0/0/95bfafb4b6200460b1b095f7f13c1d6ec7859187d17a55ba38af7e9e3ace1528.gif" />
+<h6><strong>Pufferfish</strong> (Depth 5) vs <strong>Cicada 0.1</strong> (Depth 9)
+<br>Pufferfish as White, Cicada 0.1 as Black
+</h6>
 </div>
 
 ## 🎯 Features
