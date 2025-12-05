@@ -4,6 +4,11 @@
 
 A hybrid chess engine combining the minimax algorithm with alpha-beta pruning, supported by a neural network for best move prediction.
 
+<br>
+
+<img width="400" height="400" alt="image" src="https://github.com/user-attachments/assets/fb57072b-8b6a-4978-bf7a-4cfbb3c96779" />
+
+
 ## 🎯 Features
 
 - **Hybrid Architecture**: Minimax algorithm with alpha-beta pruning assisted by a neural network
