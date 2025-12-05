@@ -6,8 +6,9 @@ A hybrid chess engine combining the minimax algorithm with alpha-beta pruning, s
 
 <br>
 
-<img width="400" height="400" alt="image" src="https://images.chesscomfiles.com/uploads/game-gifs/90px/green/neo/0/cc/0/0/95bfafb4b6200460b1b095f7f13c1d6ec7859187d17a55ba38af7e9e3ace1528.gif" />
-
+<div align="center">
+<img width="500" height="500" alt="image" src="https://images.chesscomfiles.com/uploads/game-gifs/90px/green/neo/0/cc/0/0/95bfafb4b6200460b1b095f7f13c1d6ec7859187d17a55ba38af7e9e3ace1528.gif" />
+</div>
 
 ## 🎯 Features
 
